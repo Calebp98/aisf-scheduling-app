@@ -4,16 +4,16 @@ import { CONSTS } from "@/utils/constants";
 export type Session = {
   ID: string;
   Title: string;
-  Description: string;
+  Description?: string;
   "Start time": string;
   "End time": string;
   Hosts?: string[];
   "Host name"?: string[];
   "Host email"?: string;
-  Location: string[];
-  "Location name": string[];
-  Capacity: number;
-  "Num RSVPs": number;
+  Location?: string[];
+  "Location name"?: string[];
+  Capacity?: number;
+  "Num RSVPs"?: number;
 };
 export async function getSessions() {
   const sessions: Session[] = [];
@@ -30,9 +30,8 @@ export async function getSessions() {
         "Location",
         "Location name",
         "Capacity",
-        "Num RSVPs",
       ],
-      filterByFormula: `AND({Start time}, {End time}, {Location})`,
+      filterByFormula: `AND({Start time}, {End time})`,
     })
     .eachPage(function page(records: any, fetchNextPage: any) {
       records.forEach(function (record: any) {
@@ -45,7 +44,7 @@ export async function getSessions() {
 
 export async function getSessionsByEvent(eventName: string) {
   const sessions: Session[] = [];
-  const isScheduledFilter = "AND({Start time}, {End time}, {Location})";
+  const isScheduledFilter = "AND({Start time}, {End time})";
   const filterFormula = CONSTS.MULTIPLE_EVENTS
     ? `AND({Event name} = "${eventName}", ${isScheduledFilter})`
     : isScheduledFilter;
@@ -62,7 +61,6 @@ export async function getSessionsByEvent(eventName: string) {
         "Location",
         "Location name",
         "Capacity",
-        "Num RSVPs",
       ],
       filterByFormula: filterFormula,
     })

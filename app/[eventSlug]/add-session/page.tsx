@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { getDaysByEvent } from "@/db/days";
 import { getSessionsByEvent } from "@/db/sessions";
 import { getGuestsByEvent } from "@/db/guests";
-import { getBookableLocations } from "@/db/locations";
+import { getCommunitySessionLocations } from "@/db/locations";
 import { CONSTS } from "@/utils/constants";
 
 export default async function AddSession(props: {
@@ -17,7 +17,7 @@ export default async function AddSession(props: {
     getDaysByEvent(eventName),
     getSessionsByEvent(eventName),
     getGuestsByEvent(eventName),
-    getBookableLocations(),
+    getCommunitySessionLocations(),
   ]);
   days.forEach((day) => {
     const dayStartMillis = new Date(day.Start).getTime();
@@ -32,7 +32,7 @@ export default async function AddSession(props: {
   });
   const filteredLocations = locations.filter(
     (location) =>
-      location.Bookable &&
+      location["Community Sessions"] &&
       (!CONSTS.MULTIPLE_EVENTS ||
         (event["Location names"] &&
           event["Location names"].includes(location.Name)))

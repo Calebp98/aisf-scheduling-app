@@ -1,23 +1,9 @@
 import type { Metadata } from "next";
-import { Inter, Montserrat, Roboto } from "next/font/google";
 import "./globals.css";
 import NavBar from "./nav-bar";
 import { Context } from "./context";
 import clsx from "clsx";
 import { CONSTS } from "@/utils/constants";
-
-const inter = Inter({ subsets: ["latin"] });
-const roboto = Roboto({
-  subsets: ["latin"],
-  variable: "--font-roboto",
-  weight: ["100", "300", "400", "500", "700", "900"],
-});
-const monteserrat = Montserrat({
-  subsets: ["latin"],
-  variable: "--font-monteserrat",
-});
-
-const fontVars = [roboto.variable, monteserrat.variable].join(" ");
 
 export const metadata: Metadata = {
   title: CONSTS.TITLE,
@@ -33,8 +19,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={fontVars}>
-      <body className="font-monteserrat">
+    <html lang="en">
+      <body className="font-mono bg-white text-black">
         <Context>
           {CONSTS.MULTIPLE_EVENTS && <NavBar />}
           <main

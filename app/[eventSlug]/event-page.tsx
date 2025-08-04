@@ -19,6 +19,8 @@ export default async function EventPage(props: { event: Event }) {
     getGuests(),
     getRSVPsByUser(currentUser),
   ]);
+  
+  console.log(`🔍 Loading RSVPs for user: ${currentUser || 'none'} - Found ${rsvps.length} RSVPs`);
   days.forEach((day) => {
     const dayStartMillis = new Date(day.Start).getTime();
     const dayEndMillis = new Date(day.End).getTime();

@@ -7,15 +7,15 @@ export type NavItem = {
 };
 
 export const CONSTS = {
-  TITLE: "Example Conference Weekend",
+  TITLE: "AI Security Forum",
   DESCRIPTION:
-    "An Example Conference is happening from August 23 - 25, 2024 at Lighthaven. Check out the schedules for the main event and afterparty below!",
-  MULTIPLE_EVENTS: true,
+    "We bring together experts in AI, cybersecurity, and policy to secure powerful AI models—preventing catastrophes while accelerating scientific and economic progress.",
+  MULTIPLE_EVENTS: false, // Set to true if you have multiple events
   // If you have multiple events, add your events to the nav bar below
   // If you only have one event, you can leave the array empty
   // Find available icons at https://heroicons.com/
   NAV_ITEMS: [
-    { name: "Conference", href: "/Conference", icon: UserGroupIcon },
-    { name: "After Party", href: "/After-Party", icon: CakeIcon },
+    // { name: "Conference", href: "/Conference", icon: UserGroupIcon },
+    // { name: "After Party", href: "/After-Party", icon: CakeIcon },
   ] as NavItem[],
 };

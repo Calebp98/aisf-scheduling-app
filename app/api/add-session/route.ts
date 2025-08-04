@@ -23,7 +23,7 @@ type SessionInsert = {
   Hosts: string[];
   Location: string[];
   Event?: string[];
-  "Attendee scheduled": boolean;
+  // "Attendee scheduled": boolean; // REMOVED: Field doesn't exist in Airtable
 };
 
 export const dynamic = "force-dynamic"; // defaults to auto
@@ -58,7 +58,7 @@ export async function POST(req: Request) {
     "End time": new Date(
       startTimeStamp.getTime() + duration * 60 * 1000
     ).toISOString(),
-    "Attendee scheduled": true,
+    // "Attendee scheduled": true, // REMOVED: Field doesn't exist in Airtable
   };
   if (CONSTS.MULTIPLE_EVENTS && day["Event"]) {
     session.Event = [day["Event"][0]];
@@ -98,7 +98,7 @@ const validateSession = (
   const sessionStartsBeforeEnds = sessionStart < sessionEnd;
   const sessionStartsAfterNow = sessionStart > new Date();
   const sessionsHere = existingSessions.filter((s) => {
-    return s["Location"][0] === session["Location"][0];
+    return s["Location"]?.[0] === session["Location"]?.[0];
   });
   const concurrentSessions = sessionsHere.filter((s) => {
     const sStart = new Date(s["Start time"]);

@@ -27,15 +27,15 @@ export function DayText(props: {
   const includedSessions = day.Sessions.filter((session) => {
     return (
       includedLocations.some((location) =>
-        session["Location name"].includes(location.Name)
+        session["Location name"]?.includes(location.Name)
       ) && sessionMatchesSearch(session, search)
     );
   });
   const sessionsSortedByLocation = includedSessions.sort((a, b) => {
     return (
-      (locations.find((loc) => loc.Name === a["Location name"][0])?.Index ??
+      (locations.find((loc) => loc.Name === a["Location name"]?.[0])?.Index ??
         0) -
-      (locations.find((loc) => loc.Name === b["Location name"][0])?.Index ?? 0)
+      (locations.find((loc) => loc.Name === b["Location name"]?.[0])?.Index ?? 0)
     );
   });
   const sessionsSortedByTime = sessionsSortedByLocation.sort((a, b) => {
@@ -69,13 +69,13 @@ export function DayText(props: {
                 key={`${session["Title"]} + ${session["Start time"]} + ${session["End time"]}`}
                 session={session}
                 locations={locations.filter((loc) =>
-                  session["Location name"].includes(loc.Name)
+                  session["Location name"]?.includes(loc.Name)
                 )}
               />
             ))}
           </>
         ) : (
-          <p className="text-gray-500 italic text-sm w-full text-left">
+          <p className="text-black italic text-sm w-full text-left">
             No sessions
           </p>
         )}
@@ -92,7 +92,7 @@ function sessionMatchesSearch(session: Session, search: string) {
       search,
       (session["Host name"] ?? []).join(" ") ?? ""
     ) ||
-    checkStringForSearch(search, session["Location name"].join(" ") ?? "")
+    checkStringForSearch(search, session["Location name"]?.join(" ") ?? "")
   );
 }
 

@@ -13,6 +13,7 @@ import { useContext, useState } from "react";
 import { CurrentUserModal } from "../modals";
 import { UserContext } from "../context";
 import { useScreenWidth } from "@/utils/hooks";
+import { useRSVP } from "@/hooks/useRSVP";
 
 export function SessionBlock(props: {
   eventName: string;
@@ -28,12 +29,15 @@ export function SessionBlock(props: {
   const sessionLength = endTime - startTime;
   const numHalfHours = sessionLength / 1000 / 60 / 30;
   const isBlank = !session.Title;
+  
   const isBookable =
     !!isBlank &&
     !!location.Bookable &&
+    location.Name === "Community Breakout Room" &&
     startTime > new Date().getTime() &&
     startTime >= new Date(day["Start bookings"]).getTime() &&
     startTime < new Date(day["End bookings"]).getTime();
+    
   return isBookable ? (
     <BookableSessionCard
       eventName={eventName}
@@ -72,13 +76,14 @@ export function BookableSessionCard(props: {
     .setZone("America/Los_Angeles")
     .toFormat("HH:mm");
   const eventSlug = eventName.replace(" ", "-");
+  
   return (
     <div className={`row-span-${numHalfHours} my-0.5 min-h-10`}>
       <Link
-        className="rounded font-roboto h-full w-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"
+        className="rounded font-mono h-full w-full bg-white border border-black hover:bg-gray-100 flex items-center justify-center"
         href={`/${eventSlug}/add-session?location=${location.Name}&time=${timeParam}&day=${dayParam}`}
       >
-        <PlusIcon className="h-4 w-4 text-gray-400" />
+        <PlusIcon className="h-4 w-4 text-black" />
       </Link>
     </div>
   );
@@ -87,17 +92,6 @@ export function BookableSessionCard(props: {
 function BlankSessionCard(props: { numHalfHours: number }) {
   const { numHalfHours } = props;
   return <div className={`row-span-${numHalfHours} my-0.5 min-h-12`} />;
-}
-
-async function rsvp(guestId: string, sessionId: string, remove = false) {
-  await fetch("/api/toggle-rsvp", {
-    method: "POST",
-    body: JSON.stringify({
-      guestId,
-      sessionId,
-      remove,
-    }),
-  });
 }
 
 export function RealSessionCard(props: {
@@ -109,38 +103,49 @@ export function RealSessionCard(props: {
 }) {
   const { session, numHalfHours, location, guests, rsvpsForEvent } = props;
   const { user: currentUser } = useContext(UserContext);
-  const [optimisticRSVPResponse, setOptimisticRSVPResponse] = useState<
-    boolean | null
-  >(null);
-  const rsvpStatus =
-    optimisticRSVPResponse !== null
-      ? optimisticRSVPResponse
-      : rsvpsForEvent.length > 0;
-  const hostStatus = currentUser && session.Hosts?.includes(currentUser);
-  const lowerOpacity = !rsvpStatus && !hostStatus;
-  const formattedHostNames = session["Host name"]?.join(", ") ?? "No hosts";
+  
+  // Check if user has RSVP'd to this session
+  const userHasRSVPd = currentUser ? rsvpsForEvent.some(rsvp => 
+    rsvp.Session?.includes(session.ID) && rsvp.Guest?.includes(currentUser)
+  ) : false;
+  
+  const { isRSVPd, isLoading, toggleRSVP } = useRSVP(session.ID, userHasRSVPd);
+  
   const [rsvpModalOpen, setRsvpModalOpen] = useState(false);
   const screenWidth = useScreenWidth();
   const onMobile = screenWidth < 640;
 
   const handleClick = () => {
-    if (currentUser && !onMobile) {
-      rsvp(currentUser, session.ID, !!rsvpStatus);
-      setOptimisticRSVPResponse(!rsvpStatus);
-    } else {
-      setRsvpModalOpen(true);
+    setRsvpModalOpen(true);
+  };
+
+  const handleRSVP = async () => {
+    if (!currentUser) {
+      console.log("❌ No user selected for RSVP");
+      return;
+    }
+    
+    const success = await toggleRSVP(currentUser);
+    if (success) {
+      setRsvpModalOpen(false);
     }
   };
 
-  const numRSVPs = session["Num RSVPs"] + (optimisticRSVPResponse ? 1 : 0);
+  const formattedHostNames = session["Host name"]?.join(", ") ?? "No hosts";
+  const numRSVPs = (session["Num RSVPs"] ?? 0) + (rsvpsForEvent.length || 0);
+  
+  // Visual styling based on RSVP status
+  const isUserRSVPd = isRSVPd || userHasRSVPd;
+  const isHost = currentUser && session.Hosts?.includes(currentUser);
+  
   const SessionInfoDisplay = () => (
     <>
-      <h1 className="text-lg font-bold leading-tight">{session.Title}</h1>
-      <p className="text-xs text-gray-500 mb-2 mt-1">
+      <h1 className="text-lg font-bold leading-tight text-black">{session.Title}</h1>
+      <p className="text-xs text-black mb-2 mt-1">
         Hosted by {formattedHostNames}
       </p>
-      <p className="text-sm whitespace-pre-line">{session.Description}</p>
-      <div className="flex justify-between mt-2 gap-4 text-xs text-gray-500">
+      <p className="text-sm whitespace-pre-line text-black">{session.Description}</p>
+      <div className="flex justify-between mt-2 gap-4 text-xs text-black">
         <div className="flex gap-1">
           <UserIcon className="h-4 w-4" />
           <span>
@@ -162,6 +167,7 @@ export function RealSessionCard(props: {
       </div>
     </>
   );
+  
   return (
     <Tooltip
       content={onMobile ? undefined : <SessionInfoDisplay />}
@@ -170,29 +176,21 @@ export function RealSessionCard(props: {
       <CurrentUserModal
         close={() => setRsvpModalOpen(false)}
         open={rsvpModalOpen}
-        // rsvp here should actually be rsvp
-        rsvp={() => {
-          if (!currentUser) return;
-          rsvp(currentUser, session.ID, !!rsvpStatus);
-          setOptimisticRSVPResponse(!rsvpStatus);
-        }}
+        rsvp={handleRSVP}
         guests={guests}
-        rsvpd={rsvpStatus}
+        rsvpd={isUserRSVPd}
         sessionInfoDisplay={<SessionInfoDisplay />}
+        isLoading={isLoading}
       />
       <button
         className={clsx(
-          "py-1 px-1 rounded font-roboto h-full min-h-10 cursor-pointer flex flex-col relative w-full",
-          lowerOpacity
-            ? `bg-${location.Color}-${200} border-2 border-${
-                location.Color
-              }-${400}`
-            : `bg-${location.Color}-${500} border-2 border-${
-                location.Color
-              }-${600}`,
-          !lowerOpacity && "text-white"
+          "py-1 px-1 rounded font-mono h-full min-h-10 cursor-pointer flex flex-col relative w-full border-2 transition-colors",
+          isUserRSVPd || isHost
+            ? "bg-black text-white border-black" // User RSVP'd or is host - dark
+            : "bg-white text-black border-black hover:bg-gray-100" // Not RSVP'd - light
         )}
         onClick={handleClick}
+        disabled={isLoading}
       >
         <p
           className={clsx(
@@ -204,7 +202,7 @@ export function RealSessionCard(props: {
         </p>
         <p
           className={clsx(
-            "text-[10px] leading-tight text-left ",
+            "text-[10px] leading-tight text-left",
             numHalfHours > 2
               ? "line-clamp-3"
               : numHalfHours > 1
@@ -217,12 +215,19 @@ export function RealSessionCard(props: {
         <div
           className={clsx(
             "absolute py-[1px] px-1 rounded-tl text-[10px] bottom-0 right-0 flex gap-0.5 items-center",
-            `bg-${location.Color}-400`
+            isUserRSVPd || isHost
+              ? "bg-white text-black" // Dark session gets light badge
+              : "bg-black text-white"  // Light session gets dark badge
           )}
         >
-          <UserIcon className="h-.5 w-2.5" />
+          <UserIcon className="h-2.5 w-2.5" />
           {numRSVPs}
+          {isLoading && <span className="ml-1">...</span>}
         </div>
+        {isUserRSVPd && (
+          <div className="absolute top-0 left-0 w-2 h-2 bg-white rounded-full m-1" 
+               title="You are RSVP'd to this session" />
+        )}
       </button>
     </Tooltip>
   );

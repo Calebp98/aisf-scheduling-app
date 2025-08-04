@@ -214,7 +214,7 @@ function getAvailableStartTimes(
 ) {
   const locationSelected = !!location;
   const filteredSessions = locationSelected
-    ? sessions.filter((s) => s["Location name"][0] === location)
+    ? sessions.filter((s) => s["Location name"]?.[0] === location)
     : sessions;
   const sortedSessions = filteredSessions.sort(
     (a, b) =>
@@ -428,8 +428,8 @@ function SelectDay(props: {
   return (
     <fieldset>
       <div className="space-y-4">
-        {days.map((d) => {
-          const formattedDay = format(d.Start, "EEEE, MMMM d");
+        {days.filter(d => d.Start).map((d) => {
+          const formattedDay = format(new Date(d.Start), "EEEE, MMMM d");
           return (
             <div key={formattedDay} className="flex items-center">
               <input

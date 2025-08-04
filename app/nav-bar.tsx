@@ -11,7 +11,7 @@ export default function Example() {
   return (
     <Disclosure
       as="nav"
-      className="bg-white border-b border-gray-300 fixed w-full z-30"
+      className="bg-white border-b border-black fixed w-full z-30"
     >
       {({ open }) => (
         <>
@@ -19,7 +19,7 @@ export default function Example() {
             <div className="relative flex h-16 items-center justify-between">
               <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
                 {/* Mobile menu button*/}
-                <Disclosure.Button className="relative inline-flex items-center justify-center rounded-md p-2 text-rose-400 hover:bg-rose-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-rose-400">
+                <Disclosure.Button className="relative inline-flex items-center justify-center rounded-md p-2 text-black hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-black">
                   <span className="absolute -inset-0.5" />
                   {open ? (
                     <XMarkIcon className="block h-6 w-6 stroke-2" />
@@ -68,8 +68,8 @@ function NavBarItem(props: { item: NavItem }) {
       href={item.href}
       className={clsx(
         isCurrentPage
-          ? "bg-rose-50 text-rose-400"
-          : "text-gray-400 hover:bg-gray-100",
+          ? "bg-black text-white"
+          : "text-black hover:bg-gray-100",
         "group flex gap-1 cursor-pointer items-center rounded-md px-3 py-2 text-sm font-medium"
       )}
     >
@@ -89,8 +89,8 @@ function SmallNavBarItem(props: { item: NavItem }) {
       href={item.href}
       className={clsx(
         isCurrentPage
-          ? "bg-rose-50 text-rose-400"
-          : "text-gray-400 hover:bg-gray-100",
+          ? "bg-black text-white"
+          : "text-black hover:bg-gray-100",
         "flex gap-2 rounded-md px-3 py-2 text-base font-medium"
       )}
     >

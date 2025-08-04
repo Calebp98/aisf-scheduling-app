@@ -149,7 +149,7 @@ export function DayGrid(props: {
                   <LocationCol
                     key={location.Name}
                     sessions={day.Sessions.filter((session) =>
-                      session["Location name"].includes(location.Name)
+                      session["Location name"]?.includes(location.Name)
                     )}
                     guests={guests}
                     rsvps={rsvps}

@@ -21,7 +21,7 @@ export function ScheduleSettings(props: { guests: Guest[] }) {
   return (
     <div className="flex flex-col gap-5 w-full rounded-md border border-gray-100 p-2 text-sm sm:text-base">
       <div className="flex flex-col gap-1">
-        <span className="text-gray-500">View</span>
+        <span className="text-black">View</span>
         <SelectView
           urlSearchParams={urlSearchParams}
           view={view}
@@ -31,7 +31,7 @@ export function ScheduleSettings(props: { guests: Guest[] }) {
         />
       </div>
       <div className="flex flex-col gap-1">
-        <span className="text-gray-500">Showing schedule for...</span>
+        <span className="text-black">Showing schedule for...</span>
         <UserSelect guests={guests} />
       </div>
     </div>
@@ -69,10 +69,10 @@ function SelectView(props: {
         <button
           key={v.name}
           className={clsx(
-            "flex gap-1 items-center rounded-md text-xs sm:text-sm py-1.5 px-3 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-rose-400",
+            "flex gap-1 items-center rounded-md text-xs sm:text-sm py-1.5 px-3 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-black",
             view === v.name
-              ? "bg-rose-400 text-white"
-              : "text-gray-400 hover:bg-gray-50 ring-1 ring-inset ring-gray-300"
+              ? "bg-black text-white"
+              : "text-black hover:bg-gray-50 ring-1 ring-inset ring-black"
           )}
           onClick={() => {
             if (view === v.name) return;
