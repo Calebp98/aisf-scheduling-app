@@ -7,12 +7,9 @@ import {
   FlagIcon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
-import { UserSelect } from "../user-select";
-import { Guest } from "@/db/guests";
 import { Location } from "@/db/locations";
 
-export function ScheduleSettings(props: { guests: Guest[] }) {
-  const { guests } = props;
+export function ScheduleSettings() {
   const searchParams = useSearchParams();
   const [view, setView] = useState(searchParams.get("view") ?? "grid");
   const urlSearchParams = new URLSearchParams(searchParams);
@@ -29,10 +26,6 @@ export function ScheduleSettings(props: { guests: Guest[] }) {
           pathname={pathname}
           replace={replace}
         />
-      </div>
-      <div className="flex flex-col gap-1">
-        <span className="text-black">Showing schedule for...</span>
-        <UserSelect guests={guests} />
       </div>
     </div>
   );

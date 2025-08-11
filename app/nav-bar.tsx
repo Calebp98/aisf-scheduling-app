@@ -1,13 +1,16 @@
 "use client";
 import { Disclosure } from "@headlessui/react";
-import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Bars3Icon, XMarkIcon, ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { ExportScheduleModal, MapModal } from "./modals";
 import { CONSTS, NavItem } from "@/utils/constants";
+import { useAuth } from "@/components/AuthProvider";
 
 export default function Example() {
+  const { userProfile, logout } = useAuth();
+  
   return (
     <Disclosure
       as="nav"
@@ -40,6 +43,16 @@ export default function Example() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
+                  <span className="text-sm font-mono text-black hidden sm:inline">
+                    {userProfile?.displayName || 'User'}
+                  </span>
+                  <button
+                    onClick={logout}
+                    className="relative inline-flex items-center justify-center rounded-md p-1.5 bg-black text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-black"
+                    title="Logout"
+                  >
+                    <ArrowRightOnRectangleIcon className="h-5 w-5 stroke-2" />
+                  </button>
                   <MapModal />
                   <ExportScheduleModal />
                 </div>
@@ -51,6 +64,18 @@ export default function Example() {
               {CONSTS.NAV_ITEMS.map((item) => (
                 <SmallNavBarItem key={item.name} item={item} />
               ))}
+              <div className="border-t border-gray-200 pt-2 mt-2">
+                <div className="px-3 py-2 text-sm font-mono text-black">
+                  {userProfile?.displayName || 'User'}
+                </div>
+                <button
+                  onClick={logout}
+                  className="flex items-center gap-2 w-full text-left px-3 py-2 text-base font-medium text-black hover:bg-gray-100 rounded-md"
+                >
+                  <ArrowRightOnRectangleIcon className="h-5 w-5" />
+                  Logout
+                </button>
+              </div>
             </div>
           </Disclosure.Panel>
         </>

@@ -167,6 +167,7 @@ export function DayGrid(props: {
           {!scrolledToLeftEnd && (
             <div className="bg-gradient-to-l from-transparent to-white h-full absolute left-14 w-12" />
           )}
+          
         </div>
       )}
     </div>

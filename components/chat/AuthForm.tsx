@@ -34,29 +34,29 @@ export function AuthForm() {
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 border border-gray-300 rounded-lg">
-      <h2 className="text-xl font-semibold mb-4">
-        {isSignUp ? 'Sign Up for Chat' : 'Sign In to Chat'}
+    <div className="max-w-md mx-auto p-6 border-2 border-black rounded bg-white">
+      <h2 className="text-xl font-bold mb-4 font-mono text-black">
+        {isSignUp ? 'Sign Up' : 'Sign In'}
       </h2>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         {isSignUp && (
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-bold text-black font-mono mb-1">
               Display Name
             </label>
             <input
               type="text"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+              className="w-full px-3 py-2 border-2 border-black rounded font-mono bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
               placeholder="Your name"
             />
           </div>
         )}
         
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-bold text-black font-mono mb-1">
             Email
           </label>
           <input
@@ -64,13 +64,13 @@ export function AuthForm() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+            className="w-full px-3 py-2 border-2 border-black rounded font-mono bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
             placeholder="your@email.com"
           />
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-bold text-black font-mono mb-1">
             Password
           </label>
           <input
@@ -78,29 +78,38 @@ export function AuthForm() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+            className="w-full px-3 py-2 border-2 border-black rounded font-mono bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
             placeholder="Password"
           />
         </div>
         
         {error && (
-          <div className="text-red-600 text-sm">{error}</div>
+          <div className="text-black text-sm font-mono bg-gray-100 p-2 border border-black rounded">
+            Error: {error}
+          </div>
         )}
         
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50"
+          className="w-full bg-black text-white py-2 px-4 rounded font-mono font-bold hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          {loading ? 'Loading...' : (isSignUp ? 'Sign Up' : 'Sign In')}
+          {loading ? (
+            <>
+              <span className="inline-block animate-spin mr-2">⟳</span>
+              Loading...
+            </>
+          ) : (
+            isSignUp ? 'Sign Up' : 'Sign In'
+          )}
         </button>
       </form>
       
-      <p className="mt-4 text-center text-sm">
+      <p className="mt-4 text-center text-sm font-mono text-black">
         {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
         <button
           onClick={() => setIsSignUp(!isSignUp)}
-          className="text-blue-600 hover:underline"
+          className="text-black hover:underline font-bold"
         >
           {isSignUp ? 'Sign In' : 'Sign Up'}
         </button>

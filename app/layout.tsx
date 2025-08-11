@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import NavBar from "./nav-bar";
 import { Context } from "./context";
+import { AuthProvider } from "@/components/AuthProvider";
 import clsx from "clsx";
 import { CONSTS } from "@/utils/constants";
 
@@ -21,17 +22,19 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="font-mono bg-white text-black">
-        <Context>
-          {CONSTS.MULTIPLE_EVENTS && <NavBar />}
-          <main
-            className={clsx(
-              "lg:px-24 sm:px-10 p-6",
-              CONSTS.MULTIPLE_EVENTS ? "py-24" : "pt-12 pb-24"
-            )}
-          >
-            {children}
-          </main>
-        </Context>
+        <AuthProvider>
+          <Context>
+            <NavBar />
+            <main
+              className={clsx(
+                "lg:px-24 sm:px-10 p-6",
+                "py-24" // Always add padding for nav bar
+              )}
+            >
+              {children}
+            </main>
+          </Context>
+        </AuthProvider>
       </body>
     </html>
   );

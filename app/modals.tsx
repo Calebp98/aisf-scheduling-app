@@ -6,8 +6,8 @@ import {
   ArrowTopRightOnSquareIcon,
   MapIcon,
 } from "@heroicons/react/24/outline";
-import { UserSelect } from "./user-select";
 import { UserContext } from "./context";
+import { useAuth } from "@/components/AuthProvider";
 import { Guest } from "@/db/guests";
 
 export function MapModal() {
@@ -45,44 +45,36 @@ export function CurrentUserModal(props: {
 }) {
   const { guests, open, close, rsvp, sessionInfoDisplay, rsvpd, isLoading = false } = props;
   const { user } = useContext(UserContext);
+  const { userProfile } = useAuth();
   
   return (
-    <Modal open={open} setOpen={close} hideClose={!!user}>
+    <Modal open={open} setOpen={close} hideClose={true}>
       {sessionInfoDisplay}
       
-      {!user && (
-        <div className="mt-4 p-3 bg-gray-50 rounded-md">
-          <p className="text-black text-sm mb-2">Select who you are to RSVP:</p>
-          <UserSelect guests={guests} />
+      <div className="mt-4">
+        <div className="mb-3 p-2 bg-gray-50 rounded text-sm text-black font-mono">
+          <strong>RSVPing as:</strong> {userProfile?.displayName || "User"}
         </div>
-      )}
-      
-      {user && (
-        <div className="mt-4">
-          <div className="mb-3 p-2 bg-gray-50 rounded text-sm text-black">
-            <strong>RSVPing as:</strong> {guests.find(g => g.ID === user)?.Name || "Unknown User"}
-          </div>
-          
-          <button
-            type="button"
-            className="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-black text-base font-medium text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={rsvp}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Processing...
-              </>
-            ) : (
-              rsvpd ? "Un-RSVP" : "RSVP"
-            )}
-          </button>
-        </div>
-      )}
+        
+        <button
+          type="button"
+          className="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-black text-base font-medium text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed font-mono"
+          onClick={rsvp}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Processing...
+            </>
+          ) : (
+            rsvpd ? "Un-RSVP" : "RSVP"
+          )}
+        </button>
+      </div>
     </Modal>
   );
 }

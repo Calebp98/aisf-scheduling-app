@@ -1,16 +1,27 @@
 "use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/components/AuthProvider";
 
-export function useRSVP(sessionId: string, initiallyRSVPd: boolean = false) {
+interface UseRSVPOptions {
+  onRSVPChange?: () => void;
+}
+
+export function useRSVP(sessionId: string, initiallyRSVPd: boolean = false, options: UseRSVPOptions = {}) {
   const [isRSVPd, setIsRSVPd] = useState(initiallyRSVPd);
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
+  const { user } = useAuth();
 
-  const toggleRSVP = async (guestId: string) => {
-    if (!guestId) {
-      console.log("❌ No guest ID provided for RSVP");
-      return;
+  // Sync state when initiallyRSVPd changes
+  useEffect(() => {
+    setIsRSVPd(initiallyRSVPd);
+  }, [initiallyRSVPd]);
+
+  const toggleRSVP = async (firebaseUID?: string) => {
+    const userUID = firebaseUID || user?.uid;
+    
+    if (!userUID) {
+      console.log("❌ No Firebase UID provided for RSVP");
+      return false;
     }
 
     setIsLoading(true);
@@ -25,7 +36,7 @@ export function useRSVP(sessionId: string, initiallyRSVPd: boolean = false) {
         },
         body: JSON.stringify({
           sessionId,
-          guestId,
+          guestId: userUID, // Send Firebase UID
           remove: isRSVPd, // If currently RSVP'd, we want to remove it
         }),
       });
@@ -36,8 +47,8 @@ export function useRSVP(sessionId: string, initiallyRSVPd: boolean = false) {
         setIsRSVPd(!isRSVPd); // Toggle the state
         console.log(`✅ RSVP ${data.action}: ${sessionId}`);
         
-        // Refresh the page to update server-side data
-        router.refresh();
+        // Call the callback to refresh parent data
+        options.onRSVPChange?.();
         
         return true;
       } else {

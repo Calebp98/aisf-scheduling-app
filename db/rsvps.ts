@@ -3,7 +3,8 @@ import { base } from "./db";
 export type RSVP = {
   id: string;
   Session: string[];
-  Guest: string[];
+  Guest: string[]; // Legacy field - keep for compatibility
+  "Firebase UID": string; // New field for Firebase user IDs  
   Created?: string;
 };
 
@@ -12,7 +13,7 @@ export async function getAllRSVPs(): Promise<RSVP[]> {
   try {
     await base("RSVPs")
       .select({
-        fields: ["Session", "Guest", "Created"]
+        fields: ["Session", "Guest", "Firebase UID", "Created"]
       })
       .eachPage(function page(records: any, fetchNextPage: any) {
         records.forEach(function (record: any) {
@@ -30,21 +31,22 @@ export async function getAllRSVPs(): Promise<RSVP[]> {
   return rsvps;
 }
 
-export async function getRSVPsByUser(guestId?: string): Promise<RSVP[]> {
-  if (!guestId) {
-    console.log("⚠️ No guest ID provided, returning empty RSVPs");
+export async function getRSVPsByUser(firebaseUID?: string): Promise<RSVP[]> {
+  if (!firebaseUID) {
+    console.log("⚠️ No Firebase UID provided, returning empty RSVPs");
     return [];
   }
   
   const allRSVPs = await getAllRSVPs();
   const userRSVPs = allRSVPs.filter(rsvp => 
-    rsvp.Guest && rsvp.Guest.includes(guestId)
+    rsvp["Firebase UID"] === firebaseUID || 
+    (rsvp.Guest && rsvp.Guest.includes(firebaseUID)) // Fallback for compatibility
   );
   
-  console.log(`👤 User ${guestId} has ${userRSVPs.length} RSVPs:`, userRSVPs.map(r => ({
+  console.log(`👤 Firebase user ${firebaseUID} has ${userRSVPs.length} RSVPs:`, userRSVPs.map(r => ({
     id: r.id,
     session: r.Session?.[0],
-    guest: r.Guest?.[0]
+    firebaseUID: r["Firebase UID"]
   })));
   
   return userRSVPs;
@@ -60,15 +62,15 @@ export async function getRSVPsBySession(sessionId: string): Promise<RSVP[]> {
   return sessionRSVPs;
 }
 
-export async function createRSVP(sessionId: string, guestId: string): Promise<string | null> {
+export async function createRSVP(sessionId: string, firebaseUID: string): Promise<string | null> {
   try {
-    console.log(`➕ Creating RSVP: ${guestId} → ${sessionId}`);
+    console.log(`➕ Creating RSVP: Firebase user ${firebaseUID} → ${sessionId}`);
     
     const result = await base("RSVPs").create([
       {
         fields: {
           Session: [sessionId],
-          Guest: [guestId]
+          "Firebase UID": firebaseUID // Store Firebase UID in text field
         }
       }
     ]);
@@ -83,13 +85,13 @@ export async function createRSVP(sessionId: string, guestId: string): Promise<st
   }
 }
 
-export async function deleteRSVP(sessionId: string, guestId: string): Promise<boolean> {
+export async function deleteRSVP(sessionId: string, firebaseUID: string): Promise<boolean> {
   try {
-    console.log(`🗑️ Deleting RSVP: ${guestId} → ${sessionId}`);
+    console.log(`🗑️ Deleting RSVP: Firebase user ${firebaseUID} → ${sessionId}`);
     
     const allRSVPs = await getAllRSVPs();
     const rsvpToDelete = allRSVPs.find(rsvp =>
-      rsvp.Session?.includes(sessionId) && rsvp.Guest?.includes(guestId)
+      rsvp.Session?.includes(sessionId) && rsvp["Firebase UID"] === firebaseUID
     );
     
     if (!rsvpToDelete) {

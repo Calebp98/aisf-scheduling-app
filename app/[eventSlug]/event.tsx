@@ -13,6 +13,7 @@ import { Guest } from "@/db/guests";
 import { Location } from "@/db/locations";
 import { RSVP } from "@/db/rsvps";
 import { CONSTS } from "@/utils/constants";
+import { useUserRSVPs } from "@/hooks/useUserRSVPs";
 
 export function EventDisplay(props: {
   event: Event;
@@ -22,6 +23,7 @@ export function EventDisplay(props: {
   rsvps: RSVP[];
 }) {
   const { event, days, locations, guests, rsvps } = props;
+  const { rsvps: userRSVPs } = useUserRSVPs();
   const daysForEvent = days.filter(
     (day) =>
       !CONSTS.MULTIPLE_EVENTS ||
@@ -68,7 +70,7 @@ export function EventDisplay(props: {
       </div>
       <p className="text-black mt-3 mb-5">{event.Description}</p>
       <div className="mb-10 w-full">
-        <ScheduleSettings guests={guests} />
+        <ScheduleSettings />
       </div>
       {view !== "grid" && (
         <Input
@@ -86,7 +88,7 @@ export function EventDisplay(props: {
                 day={day}
                 locations={locationsForEvent}
                 guests={guests}
-                rsvps={rsvps}
+                rsvps={userRSVPs}
                 eventName={event.Name}
               />
             ) : (
@@ -94,7 +96,7 @@ export function EventDisplay(props: {
                 day={day}
                 search={search}
                 locations={locationsForEvent}
-                rsvps={view === "rsvp" ? rsvps : []}
+                rsvps={view === "rsvp" ? userRSVPs : []}
               />
             )}
           </div>

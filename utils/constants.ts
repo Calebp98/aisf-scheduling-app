@@ -9,13 +9,11 @@ export type NavItem = {
 export const CONSTS = {
   TITLE: "AI Security Forum",
   DESCRIPTION:
-    "We bring together experts in AI, cybersecurity, and policy to secure powerful AI models—preventing catastrophes while accelerating scientific and economic progress.",
-  MULTIPLE_EVENTS: false, // Set to true if you have multiple events
-  // If you have multiple events, add your events to the nav bar below
-  // If you only have one event, you can leave the array empty
-  // Find available icons at https://heroicons.com/
+    "We bring together experts in AI, cybersecurity, and policy to secure powerful AI models—preventing catastrophies while accelerating scientific and economic progress.",
+  MULTIPLE_EVENTS: false, // Show single event directly but still have nav
+  // Navigation items for the unified app
   NAV_ITEMS: [
-    // { name: "Conference", href: "/Conference", icon: UserGroupIcon },
-    // { name: "After Party", href: "/After-Party", icon: CakeIcon },
+    { name: "Schedule", href: "/", icon: UserGroupIcon },
+    { name: "Chat", href: "/chat", icon: CakeIcon },
   ] as NavItem[],
 };

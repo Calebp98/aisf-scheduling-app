@@ -14,6 +14,9 @@ import { CurrentUserModal } from "../modals";
 import { UserContext } from "../context";
 import { useScreenWidth } from "@/utils/hooks";
 import { useRSVP } from "@/hooks/useRSVP";
+import { useUserRSVPs } from "@/hooks/useUserRSVPs";
+import { useAllRSVPs } from "@/hooks/useAllRSVPs";
+import { MeetingRequestModal } from "@/components/MeetingRequestModal";
 
 export function SessionBlock(props: {
   eventName: string;
@@ -48,7 +51,7 @@ export function SessionBlock(props: {
   ) : (
     <>
       {isBlank ? (
-        <BlankSessionCard numHalfHours={numHalfHours} />
+        <BlankSessionCard numHalfHours={numHalfHours} session={session} />
       ) : (
         <RealSessionCard
           session={session}
@@ -89,9 +92,31 @@ export function BookableSessionCard(props: {
   );
 }
 
-function BlankSessionCard(props: { numHalfHours: number }) {
-  const { numHalfHours } = props;
-  return <div className={`row-span-${numHalfHours} my-0.5 min-h-12`} />;
+function BlankSessionCard(props: { numHalfHours: number; session: Session }) {
+  const { numHalfHours, session } = props;
+  const [meetingModalOpen, setMeetingModalOpen] = useState(false);
+  
+  const handleMeetingClick = () => {
+    setMeetingModalOpen(true);
+  };
+  
+  return (
+    <div className={`row-span-${numHalfHours} my-0.5 min-h-12 relative group`}>
+      <MeetingRequestModal
+        open={meetingModalOpen}
+        onClose={() => setMeetingModalOpen(false)}
+        startTime={session["Start time"]}
+        endTime={session["End time"]}
+        sessionTitle="Free time"
+      />
+      <button
+        onClick={handleMeetingClick}
+        className="absolute inset-0 w-full h-full bg-gray-50 border border-dashed border-gray-300 rounded hover:bg-gray-100 hover:border-gray-400 transition-colors opacity-0 group-hover:opacity-100 flex items-center justify-center text-xs font-mono text-gray-600"
+      >
+        Book 1:1
+      </button>
+    </div>
+  );
 }
 
 export function RealSessionCard(props: {
@@ -103,15 +128,21 @@ export function RealSessionCard(props: {
 }) {
   const { session, numHalfHours, location, guests, rsvpsForEvent } = props;
   const { user: currentUser } = useContext(UserContext);
+  const { hasRSVP, refreshRSVPs } = useUserRSVPs();
+  const { getRSVPCount, refreshAllRSVPs } = useAllRSVPs();
   
-  // Check if user has RSVP'd to this session
-  const userHasRSVPd = currentUser ? rsvpsForEvent.some(rsvp => 
-    rsvp.Session?.includes(session.ID) && rsvp.Guest?.includes(currentUser)
-  ) : false;
+  // Check if user has RSVP'd to this session using client-side data
+  const userHasRSVPd = hasRSVP(session.ID);
   
-  const { isRSVPd, isLoading, toggleRSVP } = useRSVP(session.ID, userHasRSVPd);
+  const { isRSVPd, isLoading, toggleRSVP } = useRSVP(session.ID, userHasRSVPd, {
+    onRSVPChange: () => {
+      refreshRSVPs();
+      refreshAllRSVPs();
+    }
+  });
   
   const [rsvpModalOpen, setRsvpModalOpen] = useState(false);
+  const [meetingModalOpen, setMeetingModalOpen] = useState(false);
   const screenWidth = useScreenWidth();
   const onMobile = screenWidth < 640;
 
@@ -119,20 +150,20 @@ export function RealSessionCard(props: {
     setRsvpModalOpen(true);
   };
 
+  const handleMeetingClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setMeetingModalOpen(true);
+  };
+
   const handleRSVP = async () => {
-    if (!currentUser) {
-      console.log("❌ No user selected for RSVP");
-      return;
-    }
-    
-    const success = await toggleRSVP(currentUser);
+    const success = await toggleRSVP();
     if (success) {
       setRsvpModalOpen(false);
     }
   };
 
   const formattedHostNames = session["Host name"]?.join(", ") ?? "No hosts";
-  const numRSVPs = (session["Num RSVPs"] ?? 0) + (rsvpsForEvent.length || 0);
+  const numRSVPs = getRSVPCount(session.ID);
   
   // Visual styling based on RSVP status
   const isUserRSVPd = isRSVPd || userHasRSVPd;
@@ -182,6 +213,13 @@ export function RealSessionCard(props: {
         sessionInfoDisplay={<SessionInfoDisplay />}
         isLoading={isLoading}
       />
+      <MeetingRequestModal
+        open={meetingModalOpen}
+        onClose={() => setMeetingModalOpen(false)}
+        startTime={session["Start time"]}
+        endTime={session["End time"]}
+        sessionTitle={session.Title}
+      />
       <button
         className={clsx(
           "py-1 px-1 rounded font-mono h-full min-h-10 cursor-pointer flex flex-col relative w-full border-2 transition-colors",
@@ -228,6 +266,18 @@ export function RealSessionCard(props: {
           <div className="absolute top-0 left-0 w-2 h-2 bg-white rounded-full m-1" 
                title="You are RSVP'd to this session" />
         )}
+        <button
+          onClick={handleMeetingClick}
+          className={clsx(
+            "absolute top-1 right-1 text-[9px] px-1 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity font-mono font-bold",
+            isUserRSVPd || isHost
+              ? "bg-white text-black hover:bg-gray-100" // Dark session gets light button
+              : "bg-black text-white hover:bg-gray-800"  // Light session gets dark button
+          )}
+          title="Book 1:1 meeting during this time"
+        >
+          1:1
+        </button>
       </button>
     </Tooltip>
   );

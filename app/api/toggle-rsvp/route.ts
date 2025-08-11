@@ -2,7 +2,7 @@ import { createRSVP, deleteRSVP, getRSVPsByUser } from "@/db/rsvps";
 
 type RSVPRequest = {
   sessionId: string;
-  guestId: string;
+  guestId: string; // Now contains Firebase UID
   remove?: boolean;
 };
 
@@ -12,7 +12,7 @@ export async function POST(req: Request) {
   try {
     const { sessionId, guestId, remove = false } = (await req.json()) as RSVPRequest;
     
-    console.log(`🎯 RSVP Request: ${remove ? 'REMOVE' : 'ADD'} | Guest: ${guestId} | Session: ${sessionId}`);
+    console.log(`🎯 RSVP Request: ${remove ? 'REMOVE' : 'ADD'} | Firebase UID: ${guestId} | Session: ${sessionId}`);
     
     // Validate inputs
     if (!sessionId || !guestId) {
